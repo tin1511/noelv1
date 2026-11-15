@@ -17,8 +17,13 @@ body{background:radial-gradient(ellipse at 50% 110%,#4a1d52 0%,#16173f 48%,#0506
 #skip{right:12px;display:none}#mus{left:12px;display:none}
 #letter{left:50%;top:50%;transform:translate(-50%,-50%);width:min(86vw,430px);background:linear-gradient(160deg,#fff8e8,#f3dfb6);color:#5a2a1a;padding:26px 24px;border-radius:6px;box-shadow:0 0 60px rgba(255,200,120,.45);font:600 23px/1.6 "Dancing Script","Be Vietnam Pro",cursive,serif;z-index:3;min-height:220px}
 #letter p{margin:0 0 10px}
-#hint{left:0;right:0;bottom:calc(18px + env(safe-area-inset-bottom,0px));text-align:center;font-size:14px;opacity:.75;pointer-events:none}
+#hint{left:0;right:0;top:calc(58px + env(safe-area-inset-top,0px));text-align:center;font-size:14px;opacity:.75;pointer-events:none;transition:opacity 1.2s}
 #pm{inset:0;background:rgba(5,6,26,.88);align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:6;cursor:pointer}
 #pi{width:min(70vw,300px);border-radius:4px;box-shadow:0 0 50px rgba(255,210,140,.4)}
 #pc{font:700 24px "Dancing Script","Be Vietnam Pro",cursive;color:var(--gold);text-align:center;padding:0 20px}
 @media (prefers-reduced-motion:reduce){#start h1,#go{animation:none}}
+#letter{transition:left 1s ease,top 1s ease,transform 1s ease,width 1s ease,font-size 1s ease,opacity .5s}
+#letter.dock{left:3vw;top:50%;transform:translateY(-50%);width:min(32vw,360px);font-size:21px;min-height:0;max-height:78vh;overflow:auto}
+#letter.hide{opacity:0;pointer-events:none}
+#ltog{left:88px;display:none}
+@media (max-width:760px){#letter.dock{left:50%;top:67vh;transform:translateX(-50%);width:min(92vw,430px);max-height:29vh;font-size:19px;padding:14px 18px}}
