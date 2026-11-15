@@ -23,7 +23,7 @@ body{background:radial-gradient(ellipse at 50% 110%,#4a1d52 0%,#16173f 48%,#0506
 #pc{font:700 24px "Dancing Script","Be Vietnam Pro",cursive;color:var(--gold);text-align:center;padding:0 20px}
 @media (prefers-reduced-motion:reduce){#start h1,#go{animation:none}}
 #letter{transition:left 1s ease,top 1s ease,transform 1s ease,width 1s ease,font-size 1s ease,opacity .5s}
-#letter.dock{left:3vw;top:50%;transform:translateY(-50%);width:min(32vw,360px);font-size:21px;min-height:0;max-height:78vh;overflow:auto}
+#letter.dock{left:calc(97vw - min(32vw,360px));top:50%;transform:translateY(-50%);width:min(32vw,360px);font-size:21px;min-height:0;max-height:78vh;overflow:auto}
 #letter.hide{opacity:0;pointer-events:none}
 #ltog{left:88px;display:none}
 @media (max-width:760px){#letter.dock{left:50%;top:67vh;transform:translateX(-50%);width:min(92vw,430px);max-height:29vh;font-size:19px;padding:14px 18px}}
