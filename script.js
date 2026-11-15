@@ -7,7 +7,7 @@ const CONFIG={
  photos:[{e:"🥰",t:"Lần đầu mình gặp nhau",d:"Kỷ niệm 1"},{e:"🍜",t:"Bữa ăn đáng nhớ",d:"Kỷ niệm 2"},{e:"🌅",t:"Buổi chiều bên nhau",d:"Kỷ niệm 3"},{e:"🎬",t:"Hôm đi xem phim",d:"Kỷ niệm 4"},{e:"🌸",t:"Chuyến đi đầu tiên",d:"Kỷ niệm 5"},{e:"💌",t:"Lời chúc đặc biệt",d:"Kỷ niệm 6"}]
 };
 const $=id=>document.getElementById(id),wait=ms=>new Promise(r=>setTimeout(r,ms));
-const SCRIPT='"Segoe Script","Brush Script MT","Snell Roundhand",cursive,Georgia,serif';
+const SCRIPT='Pacifico,"Dancing Script",cursive';
 const R=new THREE.WebGLRenderer({canvas:$("c"),antialias:true,alpha:true});
 R.setPixelRatio(Math.min(devicePixelRatio,2));
 const S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(50,1,.1,100);cam.position.z=7.5;
@@ -30,13 +30,16 @@ pts.frustumCulled=false;world.add(pts);
 function layer(n,size,op,zr,zo){const g=new THREE.BufferGeometry(),a=new Float32Array(n*3);for(let i=0;i<n;i++){a[i*3]=(Math.random()-.5)*18;a[i*3+1]=(Math.random()-.5)*12;a[i*3+2]=zo+Math.random()*zr}
  g.setAttribute("position",new THREE.BufferAttribute(a,3));const p=new THREE.Points(g,new THREE.PointsMaterial({size,map:GT,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending}));p.frustumCulled=false;S.add(p);return p}
 const snowF=layer(350,.06,.55,4,-6),snowN=layer(70,.16,.35,2,3),stars=layer(140,.13,.8,1,-18);
+const TR=260,tpos=new Float32Array(TR*3),tcol=new Float32Array(TR*3),tvel=new Float32Array(TR*3),tlife=new Float32Array(TR);let ti=0;
+const tg=new THREE.BufferGeometry();tg.setAttribute("position",new THREE.BufferAttribute(tpos,3));tg.setAttribute("color",new THREE.BufferAttribute(tcol,3));
+const trail=new THREE.Points(tg,new THREE.PointsMaterial({size:.12,map:GT,vertexColors:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));trail.frustumCulled=false;S.add(trail);
 
 // ===== Lấy mẫu hình vẽ thành điểm đích =====
 function sample(cv,scale,ox,oy){const x=cv.getContext("2d"),w=cv.width,h=cv.height,d=x.getImageData(0,0,w,h).data,a=[];
  for(let y=0;y<h;y+=2)for(let u=0;u<w;u+=2){const i=(y*w+u)*4;if(d[i+3]>120)a.push([(u-w/2)*scale+ox,(h/2-y)*scale+oy,d[i]/255,d[i+1]/255,d[i+2]/255])}return a}
 function fillList(a){const n=a.length;for(let i=0;i<N;i++){const p=a[(i*n/N)|0],j=i*3;tp[j]=p[0]+(Math.random()-.5)*.02;tp[j+1]=p[1]+(Math.random()-.5)*.02;tp[j+2]=(Math.random()-.5)*.18;tc[j]=p[2];tc[j+1]=p[3];tc[j+2]=p[4]}}
-function textCv(t,fam,stops,w=900,h=300){const cv=document.createElement("canvas");cv.width=w;cv.height=h;const x=cv.getContext("2d");let s=170;x.font=`italic 700 ${s}px ${fam}`;
- while(x.measureText(t).width>w-60&&s>20){s-=6;x.font=`italic 700 ${s}px ${fam}`}
+function textCv(t,fam,stops,wt,w=900,h=300){const cv=document.createElement("canvas");cv.width=w;cv.height=h;const x=cv.getContext("2d");let s=170;x.font=`${wt} ${s}px ${fam}`;
+ while(x.measureText(t).width>w-60&&s>20){s-=6;x.font=`${wt} ${s}px ${fam}`}
  const g=x.createLinearGradient(0,0,w,0);stops.forEach((c,i)=>g.addColorStop(i/(stops.length-1),c));
  x.fillStyle=g;x.textAlign="center";x.textBaseline="middle";x.fillText(t,w/2,h/2);return cv}
 
@@ -64,6 +67,10 @@ function genTree(){TS=Math.min(1,visW/4.2);const G=[[.1,.65,.28],[.06,.5,.22],[.
    x=Math.cos(a)*q;z=Math.sin(a)*q;y=2.2-h*4.4}
   tp[j]=x*TS;tp[j+1]=y*TS;tp[j+2]=z*TS;tc[j]=c[0];tc[j+1]=c[1];tc[j+2]=c[2]}}
 
+// thiên hà hạt xoáy ở màn hình mở đầu
+function genGalaxy(){const Rm=Math.min(visW*.5,visH*.42);for(let i=0;i<N;i++){const j=i*3,r=Math.pow(Math.random(),.7)*Rm,a=r*1.6+(i%3)*2.094+(Math.random()-.5)*.9/(r+.4),t=r/Rm;
+ tp[j]=Math.cos(a)*r;tp[j+1]=Math.sin(a)*r;tp[j+2]=(Math.random()-.5)*.5;tc[j]=1-.25*t;tc[j+1]=.85-.55*t;tc[j+2]=.6+.4*t}}
+function cap(t){const c=$("cap");c.style.opacity=0;setTimeout(()=>{c.textContent=t;c.style.opacity=t?1:0},500)}
 // ảnh polaroid treo trên cây
 const sprites=[];
 CONFIG.photos.forEach((p,k)=>{const c=document.createElement("canvas");c.width=200;c.height=240;const x=c.getContext("2d");
@@ -77,10 +84,10 @@ function placePhotos(){const H=[.25,.42,.58,.72,.35,.85];sprites.forEach((s,k)=>
 // ===== Trình tự cảnh =====
 let scene=-1,sceneT=0,K=.14,D=.8,offX=0,offY=0,repel=true,curFi=-1,LT=0,SF,S1,mx=1e3,my=1e3,letterOn=false;
 const DUR=[CONFIG.santaT,CONFIG.merryT,CONFIG.greetT];
-function enter(i){scene=i;sceneT=0;offX=offY=0;repel=i<4;for(let j=0;j<N*3;j++)vel[j]+=(Math.random()-.5)*.25;
+function enter(i){scene=i;sceneT=0;offX=offY=0;repel=i<4;cap(i==0?"Có một người đang mang quà đến cho bạn…":"");for(let j=0;j<N*3;j++)vel[j]+=(Math.random()-.5)*.25;
  if(i==0){K=.24;D=.74;curFi=-1}
- else if(i==1){K=.04;D=.88;fillList(sample(textCv(CONFIG.merry,SCRIPT,["#ff5a5a","#ffd36b","#fff"]),Math.min(visW*.92,9)/900,0,0))}
- else if(i==2){K=.04;D=.88;fillList(sample(textCv(CONFIG.greeting,"Georgia,serif",["#ffd36b","#fff","#9be7ff"]),Math.min(visW*.92,9)/900,0,0))}
+ else if(i==1){K=.04;D=.88;fillList(sample(textCv(CONFIG.merry,SCRIPT,["#ff5a5a","#ffd36b","#fff"],"400"),Math.min(visW*.92,9)/900,0,0))}
+ else if(i==2){K=.04;D=.88;fillList(sample(textCv(CONFIG.greeting,'"Dancing Script","Be Vietnam Pro",cursive',["#ffd36b","#fff","#9be7ff"],"700"),Math.min(visW*.92,9)/900,0,0))}
  else if(i==3){K=.05;D=.87;fillList(sample(envelope(),Math.min(visW*.6,4.2)/400,0,0));letterOn=false;$("skip").style.display="block"}
  else{K=.035;D=.9;genTree();placePhotos();$("skip").style.display="none";$("hint").style.display="block"}}
 async function startLetter(){const tok=++LT,box=$("lt");$("letter").style.display="block";box.innerHTML="";
@@ -97,7 +104,7 @@ function tick(){if(!musicOn)return;const m=mel[mi++%mel.length].match(/([A-G])([
  mt=setTimeout(tick,b*1000+(mi%mel.length==0?1600:0))}
 $("mus").onclick=e=>{e.stopPropagation();musicOn=!musicOn;$("mus").style.opacity=musicOn?1:.5;if(musicOn){AC.resume();tick()}else clearTimeout(mt)};
 $("start").onclick=async()=>{try{AC=new (window.AudioContext||window.webkitAudioContext)();musicOn=true;tick()}catch(e){}
- $("start").style.display="none";$("mus").style.display="block";try{await NOEL_IMG.decode()}catch(e){}S1=Math.min(visW*.42,4)/NOEL_IMG.width;SF=[sample(noelCanvas(),S1,0,0)];enter(0)};
+ $("start").classList.add("out");setTimeout(()=>$("start").style.display="none",1100);$("mus").style.display="block";try{await Promise.all([NOEL_IMG.decode(),document.fonts.load("400 80px Pacifico"),document.fonts.load(`700 80px "Dancing Script"`,CONFIG.greeting)])}catch(e){}S1=Math.min(visW*.42,4)/NOEL_IMG.width;SF=[sample(noelCanvas(),S1,0,0)];enter(0)};
 
 // ===== Tương tác =====
 let down=false,moved=0,lx=0,ly=0,openT=0;
@@ -112,10 +119,11 @@ $("pm").onclick=()=>{if(performance.now()-openT>300)$("pm").style.display="none"
 // ===== Vòng lặp =====
 let last=performance.now(),T=0;
 function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;T+=dt;sceneT+=dt;
+ if(scene<0){pts.rotation.z+=dt*.12;pts.rotation.x+=(.95-pts.rotation.x)*.05}else{const z=pts.rotation.z;pts.rotation.z+=(Math.round(z/6.2832)*6.2832-z)*.05;pts.rotation.x+=(0-pts.rotation.x)*.05}
  if(scene>=0&&scene<3&&sceneT>DUR[scene])enter(scene+1);
  if(scene==3&&!letterOn&&sceneT>CONFIG.envT){letterOn=true;startLetter()}
  if(scene==0){if(curFi!==0){curFi=0;fillList(SF[0])}
-  const half=visW/2+S1*NOEL_IMG.width*.55,u=Math.min(sceneT/DUR[0],1);offX=-half+2*half*u;offY=Math.sin(sceneT*9)*.1}
+  const half=visW/2+S1*NOEL_IMG.width*.55,u=Math.min(sceneT/DUR[0],1);offX=-half+2*half*u;offY=Math.sin(sceneT*9)*.1;for(let e=0;e<4;e++){const q=ti++%TR,b=q*3;tpos[b]=offX-S1*130+(Math.random()-.5)*S1*70;tpos[b+1]=offY+(Math.random()-.5)*S1*150-S1*10;tpos[b+2]=(Math.random()-.5)*.3;tvel[b]=-.004-Math.random()*.012;tvel[b+1]=(Math.random()-.5)*.012;tlife[q]=1}}
  for(let i=0;i<N;i++){const j=i*3;let x=pos[j],y=pos[j+1],z=pos[j+2];
   vel[j]+=(tp[j]+offX-x)*K;vel[j+1]+=(tp[j+1]+offY-y)*K;vel[j+2]+=(tp[j+2]-z)*K;
   if(repel){const dx=x-mx,dy=y-my,d2=dx*dx+dy*dy;if(d2<.7){const f=(.7-d2)*.06/(Math.sqrt(d2)+.05);vel[j]+=dx*f;vel[j+1]+=dy*f}}
@@ -127,5 +135,8 @@ function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;T+=dt;sceneT
  stars.material.opacity=.6+.25*Math.sin(T*2);
  if(scene==4){world.rotation.y+=CONFIG.treeSpin*dt*(down?0:1);
   sprites.forEach((s,k)=>{s.material.opacity+=(1-s.material.opacity)*.04;s.material.rotation=Math.sin(T*1.2+k)*.12})}
+ for(let q=0;q<TR;q++){const b=q*3,l=tlife[q];if(l>0){tlife[q]=l-dt*.9;tpos[b]+=tvel[b];tpos[b+1]+=tvel[b+1];tcol[b]=l;tcol[b+1]=.8*l;tcol[b+2]=.4*l}else{tcol[b]=tcol[b+1]=tcol[b+2]=0}}
+ tg.attributes.position.needsUpdate=true;tg.attributes.color.needsUpdate=true;
  R.render(S,cam);requestAnimationFrame(frame)}
+genGalaxy();K=.03;D=.9;repel=false;
 requestAnimationFrame(frame);
