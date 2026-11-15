@@ -136,7 +136,7 @@ function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;T+=dt;sceneT
  [[snowF,.012],[snowN,.03]].forEach(([p,v])=>{const a=p.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i+1]-=v;a[i]+=Math.sin(T+a[i+1])*.003+mx*.0004;if(a[i+1]<-6){a[i+1]=6;a[i]=(Math.random()-.5)*18}}p.geometry.attributes.position.needsUpdate=true});
  stars.material.opacity=.6+.25*Math.sin(T*2);
  if(scene==4){world.rotation.y+=CONFIG.treeSpin*dt*(down?0:1);
-  const m=innerWidth<=760,sh=docked&&!lhide,tx=sh&&!m?visW*.17:0,ty=sh&&m?visH*.13:0,ts=sh&&m?.8:1;
+  const m=innerWidth<=760,sh=docked&&!lhide,tx=sh&&!m?-visW*.17:0,ty=sh&&m?visH*.13:0,ts=sh&&m?.8:1;
   world.position.x+=(tx-world.position.x)*.05;world.position.y+=(ty-world.position.y)*.05;world.scale.setScalar(world.scale.x+(ts-world.scale.x)*.05);
   sprites.forEach((s,k)=>{s.material.opacity+=(1-s.material.opacity)*.04;s.material.rotation=Math.sin(T*1.2+k)*.12})}
  for(let q=0;q<TR;q++){const b=q*3,l=tlife[q];if(l>0){tlife[q]=l-dt*.9;tpos[b]+=tvel[b];tpos[b+1]+=tvel[b+1];tcol[b]=l;tcol[b+1]=.8*l;tcol[b+2]=.4*l}else{tcol[b]=tcol[b+1]=tcol[b+2]=0}}
