@@ -42,15 +42,31 @@ function textCv(t,fam,stops,w=900,h=300){const cv=document.createElement("canvas
 
 // ông già Noel (2 khung hình chạy)
 function santa(f){const cv=document.createElement("canvas");cv.width=300;cv.height=260;const x=cv.getContext("2d");
- const P=(c,fn)=>{x.fillStyle=c;x.beginPath();fn();x.fill()},l=f?14:-14,a=f?10:-10;
- P("#c98a4b",()=>x.ellipse(72,125,46,40,0,0,7));P("#ffd23f",()=>x.rect(52,78,40,10));
- P("#8a5a2b",()=>x.roundRect(128+l,196,36,48,9));P("#8a5a2b",()=>x.roundRect(172-l,196,36,48,9));
- P("#ff3b3b",()=>x.ellipse(170,135,62,66,0,0,7));
- P("#ffd23f",()=>x.rect(108,150,124,15));P("#fff",()=>x.rect(160,146,20,22));
- P("#e02424",()=>x.ellipse(118+a,125,20,34,.6,0,7));P("#fff",()=>x.arc(108+a,152,13,0,7));
- P("#ffd0a8",()=>x.arc(202,72,33,0,7));P("#fff",()=>x.ellipse(207,100,38,32,0,0,7));
- P("#ff3b3b",()=>{x.moveTo(166,62);x.quadraticCurveTo(190,0,248,30);x.lineTo(234,68);x.closePath()});
- P("#fff",()=>x.roundRect(162,54,78,20,10));P("#fff",()=>x.arc(250,32,12,0,7));return cv}
+ const P=(c,fn)=>{x.fillStyle=c;x.beginPath();fn();x.fill()};
+ const L=(c,w,p)=>{x.strokeStyle=c;x.lineWidth=w;x.lineCap="round";x.lineJoin="round";x.beginPath();x.moveTo(p[0],p[1]);for(let i=2;i<p.length;i+=2)x.lineTo(p[i],p[i+1]);x.stroke()};
+ // chân (2 nhịp chạy) + ủng
+ const legs=f?[[150,205,140,232,130,248],[165,205,195,215,222,226]]:[[150,205,130,230,105,222],[165,205,195,225,215,243]];
+ legs.forEach(l=>{L("#e02424",26,l);L("#a8642a",18,[l[4],l[5],l[4]+16,l[5]+2])});
+ // bao quà sau lưng
+ P("#c98a4b",()=>x.ellipse(82,120,40,36,0,0,7));P("#ffd23f",()=>x.roundRect(70,80,26,10,4));
+ // thân, viền lông, thắt lưng
+ P("#ff3b3b",()=>x.ellipse(165,150,50,56,.12,0,7));
+ P("#fff",()=>x.roundRect(118,196,94,15,8));
+ P("#ffd23f",()=>x.rect(118,150,96,12));P("#fff",()=>x.rect(155,147,18,18));
+ // hai tay (đưa qua lại theo nhịp chạy)
+ const a=f?8:-8;
+ L("#e02424",22,[140,112,108,130+a]);P("#fff",()=>x.arc(104,132+a,12,0,7));
+ L("#ff3b3b",22,[188,110,222,128-a]);P("#fff",()=>x.arc(228,130-a,12,0,7));
+ // đầu, râu, ria, mũi, mắt
+ P("#ffd0a8",()=>x.arc(208,84,30,0,7));
+ P("#fff",()=>x.ellipse(212,114,32,28,0,0,7));
+ P("#fff",()=>x.ellipse(226,92,16,8,0,0,7));
+ P("#ff7a7a",()=>x.arc(236,84,5,0,7));
+ P("#4a7bff",()=>x.arc(216,78,3.5,0,7));
+ // mũ cụp xuống phía sau có cục bông
+ P("#ff3b3b",()=>{x.moveTo(178,60);x.quadraticCurveTo(176,16,130,30);x.lineTo(136,48);x.quadraticCurveTo(170,42,240,62);x.closePath()});
+ P("#fff",()=>x.roundRect(176,52,64,16,8));P("#fff",()=>x.arc(128,36,11,0,7));
+ return cv}
 
 // phong thư
 function envelope(){const cv=document.createElement("canvas");cv.width=400;cv.height=280;const x=cv.getContext("2d");
