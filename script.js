@@ -82,18 +82,20 @@ CONFIG.photos.forEach((p,k)=>{const c=document.createElement("canvas");c.width=2
 function placePhotos(){const H=[.25,.42,.58,.72,.35,.85];sprites.forEach((s,k)=>{const h=H[k],a=k*2.4,q=h*1.75*TS*1.1;s.position.set(Math.cos(a)*q,(2.2-h*4.4)*TS,Math.sin(a)*q);s.scale.set(.6*TS+.15,.72*TS+.18,1);s.visible=true})}
 
 // ===== Trình tự cảnh =====
-let scene=-1,sceneT=0,K=.14,D=.8,offX=0,offY=0,repel=true,curFi=-1,LT=0,SF,S1,mx=1e3,my=1e3,letterOn=false;
+let docked=false,lhide=false,scene=-1,sceneT=0,K=.14,D=.8,offX=0,offY=0,repel=true,curFi=-1,LT=0,SF,S1,mx=1e3,my=1e3,letterOn=false;
 const DUR=[CONFIG.santaT,CONFIG.merryT,CONFIG.greetT];
 function enter(i){scene=i;sceneT=0;offX=offY=0;repel=i<4;cap(i==0?"Có một người đang mang quà đến cho bạn…":"");for(let j=0;j<N*3;j++)vel[j]+=(Math.random()-.5)*.25;
  if(i==0){K=.24;D=.74;curFi=-1}
  else if(i==1){K=.04;D=.88;fillList(sample(textCv(CONFIG.merry,SCRIPT,["#ff5a5a","#ffd36b","#fff"],"400"),Math.min(visW*.92,9)/900,0,0))}
  else if(i==2){K=.04;D=.88;fillList(sample(textCv(CONFIG.greeting,'"Dancing Script","Be Vietnam Pro",cursive',["#ffd36b","#fff","#9be7ff"],"700"),Math.min(visW*.92,9)/900,0,0))}
  else if(i==3){K=.05;D=.87;fillList(sample(envelope(),Math.min(visW*.6,4.2)/400,0,0));letterOn=false;$("skip").style.display="block"}
- else{K=.035;D=.9;genTree();placePhotos();$("skip").style.display="none";$("hint").style.display="block"}}
+ else{K=.035;D=.9;genTree();placePhotos();$("skip").style.display="none";$("hint").style.display="block";setTimeout(()=>$("hint").style.opacity=0,9000)}}
 async function startLetter(){const tok=++LT,box=$("lt");$("letter").style.display="block";box.innerHTML="";
  for(const line of CONFIG.letter){const p=document.createElement("p");box.appendChild(p);for(const ch of line){if(tok!==LT)return;p.textContent+=ch;await wait(34)}await wait(380)}
- await wait(2600);if(tok===LT)goTree()}
-function goTree(){LT++;$("letter").style.display="none";enter(4)}
+ await wait(1600);if(tok===LT)goTree()}
+function goTree(){LT++;const box=$("lt");box.innerHTML="";CONFIG.letter.forEach(l=>{const p=document.createElement("p");p.textContent=l;box.appendChild(p)});
+ const L=$("letter");L.style.display="block";void L.offsetWidth;L.classList.add("dock");docked=true;$("ltog").style.display="block";enter(4)}
+$("ltog").onclick=e=>{e.stopPropagation();lhide=!lhide;$("letter").classList.toggle("hide",lhide);$("ltog").textContent=lhide?"✉ Mở thư":"✉ Ẩn thư"};
 $("skip").onclick=e=>{e.stopPropagation();if(scene<4)goTree()};
 
 // nhạc Jingle Bells bằng WebAudio
@@ -134,6 +136,8 @@ function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;T+=dt;sceneT
  [[snowF,.012],[snowN,.03]].forEach(([p,v])=>{const a=p.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i+1]-=v;a[i]+=Math.sin(T+a[i+1])*.003+mx*.0004;if(a[i+1]<-6){a[i+1]=6;a[i]=(Math.random()-.5)*18}}p.geometry.attributes.position.needsUpdate=true});
  stars.material.opacity=.6+.25*Math.sin(T*2);
  if(scene==4){world.rotation.y+=CONFIG.treeSpin*dt*(down?0:1);
+  const m=innerWidth<=760,sh=docked&&!lhide,tx=sh&&!m?visW*.17:0,ty=sh&&m?visH*.13:0,ts=sh&&m?.8:1;
+  world.position.x+=(tx-world.position.x)*.05;world.position.y+=(ty-world.position.y)*.05;world.scale.setScalar(world.scale.x+(ts-world.scale.x)*.05);
   sprites.forEach((s,k)=>{s.material.opacity+=(1-s.material.opacity)*.04;s.material.rotation=Math.sin(T*1.2+k)*.12})}
  for(let q=0;q<TR;q++){const b=q*3,l=tlife[q];if(l>0){tlife[q]=l-dt*.9;tpos[b]+=tvel[b];tpos[b+1]+=tvel[b+1];tcol[b]=l;tcol[b+1]=.8*l;tcol[b+2]=.4*l}else{tcol[b]=tcol[b+1]=tcol[b+2]=0}}
  tg.attributes.position.needsUpdate=true;tg.attributes.color.needsUpdate=true;
